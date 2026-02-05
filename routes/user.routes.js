@@ -4,16 +4,29 @@ import {
     getUsers,
     createUser,
     updateUser,
+    updateUserDetails,
     deleteUser,
     getUserById
 } from '../controllers/user.controller.js';
 
+import { 
+    checkAuth, 
+    validateUserID ,
+    checkforIDinReq,
+    checkHeaderToken
+} from '../middleware/auth.js';
+
+import {
+    validateUserDTO,
+} from '../dtos/user.dto.js';
+
 const router = express.Router();
 
-router.get('/', getUsers);
-router.post('/', createUser);
-router.patch('/:id', updateUser);
-router.delete('/:id', deleteUser);
-router.get('/:id', getUserById);
+router.get('/', checkHeaderToken, checkAuth,  getUsers);
+router.post('/', validateUserDTO, createUser);
+router.put('/:id', validateUserID, updateUserDetails);
+router.patch('/:id', validateUserID, updateUser);
+router.delete('/:id', validateUserID, deleteUser);
+router.get('/id', checkforIDinReq, getUserById);
 
 export default router;

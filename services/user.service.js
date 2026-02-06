@@ -1,45 +1,83 @@
 import { users }from '../data/users.js';
+import User from '../models/users.js';
 
-export const createUserService = (body) => {
+export const createUserService = async (body) => {
     console.log('Creating user with data');
-    const newUser = { 
-        id: Date.now().toString(), 
+    const newUser = await User.create({ 
         ...body
-    };
+    });
     
     users.push(newUser);
     console.log('User created:', newUser);
     return newUser;
 }
 
-export const updateUserService = (id, body) => {
+export const updateUserService = async (id, body) => {
 
-    const user = users.find(u => u.id === id);
+    const userUpdated = await User.findByIdAndUpdate(id, 
+        {
+            $set: body
+        }, 
+        { 
+            new: true,
+            runValidators:true,
+        }
+    );
 
-    if (!user) {
-        return null;
-    }
-
-    if (body.name) user.name = body.name;
-    if (body.email) user.email = body.email;
-    
-    return user;
+    return userUpdated;
 }
 
-export const updateUserDetailsService = (id, body) => {
-
-    const user = users.find(u => u.id === id);
-
-    if (!user) {
-        return null;
-    }
-
-    if (!body.name  || !body.email){
-        return "No details provided for update";
-    }
-
-    if (body.name) user.name = body.name;
-    if (body.email) user.email = body.email;
-    
+export const updateUserDetailsService = async (id, body) => {
+    try {
+        const user = await User.findByIdAndUpdate(id,
+        {
+            $set: body
+        },
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
     return user;
+    } catch (error) {
+        console.error('Error updating user details:', error);
+        throw error;
 }
+        
+}
+
+export const getUserService = async() => {
+    const allUsers = await User.find();
+    return allUsers;
+}
+
+export const getActiveUserService = async() => {
+    const allUsers = await User.find({isActive:true});
+    return allUsers;
+}
+
+export const updateByEmailService = async(email, body) => {
+    const userUpdated = await User.findOneAndUpdate( 
+        {
+            email: email
+        }, 
+        {
+            $set: body
+        },
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
+
+    return userUpdated;
+}
+
+export const deleteUserByEmailService = async(email) => {
+    const userDeleted = await User.findOneAndDelete(
+        {
+            email: email
+        }
+    );
+    return userDeleted;
+} 
